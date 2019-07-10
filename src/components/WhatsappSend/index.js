@@ -1,39 +1,79 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
+import TextField from '@atlaskit/textfield';
+import Button, { ButtonGroup } from '@atlaskit/button';
+import FieldTextArea from '@atlaskit/field-text-area/FieldTextArea';
+import TextArea from '@atlaskit/textarea';
+import Form, { Field, FormFooter, HelperMessage } from '@atlaskit/form';
+import styled from 'styled-components';
+
+const ContentWrapper = styled.div`
+  display: flex;
+  width: 400px;
+  max-width: 100%;
+  margin: 0 auto;
+  flex-direction: column;
+`;
 
 export default function() {
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState(
+    'Olá Fulano de Tal, segue o link com sua proposta: https://www.google.com/'
+  );
 
-  const sendWhatsappMessage = (phone, message) =>
-    window.open(`https://api.whatsapp.com/send?phone=${encodeURIComponent(
-      phone
-    )}&text=${encodeURIComponent(message)}`);
+  const sendWhatsappMessage = (phone, message) => {
+    debugger;
+    window.open(
+      `https://api.whatsapp.com/send?phone=${encodeURIComponent(
+        phone
+      )}&text=${encodeURIComponent(message)}`
+    );
+  };
+
+  const removeNonNumerical = str => str.replace(/[\W_]/gi, '');
 
   return (
-    <>
-      <label id="phoneNumber-label" htmlFor="phoneNumber">
-        {phoneNumber}
-      </label>
-      <br />
-      <input
-        id="phoneNumber"
-        placeholder="Telefone"
-        onChange={event => setPhoneNumber(event.target.value)}
-      />
-      <br />
-      <label id="message-label" htmlFor="setMessage">
-        {message}
-      </label>
-      <br />
-      <input
-        id="setMessage"
-        placeholder="Mensagem"
-        onChange={event => setMessage(event.target.value)}
-      />
-      <br />
-      <button onClick={() => sendWhatsappMessage(phoneNumber, message)}>
-          Enviar mensagem
-      </button>
-    </>
+    <ContentWrapper>
+      <Form
+        onSubmit={data => {
+          debugger;
+          sendWhatsappMessage(removeNonNumerical(data.phone), message);
+        }}
+      >
+        {({ formProps }) => (
+          <form {...formProps}>
+            <Field
+              name="phone"
+              defaultValue=""
+              label="Telefone - Padrão internacional"
+              isRequired
+            >
+              {({ fieldProps, error }) => (
+                <>
+                  <TextField autoComplete="off" {...fieldProps} />
+                  {!error && (
+                    <HelperMessage>Ex: 55 21 96681 3390</HelperMessage>
+                  )}
+                </>
+              )}
+            </Field>
+            <p>Texto da mensagem</p>
+            <TextArea
+              style={{ width: '100%' }}
+              isRequired
+              value={message}
+              name="message"
+              resize="auto"
+              onChange={event => setMessage(event.target.value)}
+            />
+            <FormFooter>
+              <ButtonGroup>
+                <Button type="submit" appearance="primary">
+                  Enviar
+                </Button>
+              </ButtonGroup>
+            </FormFooter>
+          </form>
+        )}
+      </Form>
+    </ContentWrapper>
   );
 }
